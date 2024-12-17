@@ -42,37 +42,36 @@ def list_datasets():
     else:
         return jsonify([])
 
-@app.route('/api/estimate_time', methods=['POST'])
-def estimate_time():
-    global MODEL_FILE_CACHE
-    model_file = request.files.get('modelFile', None)
-    subsets_str = request.form.get('subsets', '[]')
-    subsets = json.loads(subsets_str)
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        if model_file:
-            local_model = os.path.join(tmpdir, 'uploaded_model.pth')
-            model_file.save(local_model)
-            MODEL_FILE_CACHE = local_model
-
-        combined_ds = combine_and_sample(subsets, tmpdir)
-
-        # NTK 기반 훈련 시간 예측 알고리즘 구현
-        num_samples = sum([sub['num_samples'] for sub in subsets])
-        learning_rate = 0.001
-        momentum = 0.9
-        threshold = 0.01
-        estimated_steps = estimate_ntk_time(num_samples, learning_rate, momentum, threshold)
-        estimated_time_minutes = round(estimated_steps * 0.5 / 60, 2)  # mock time conversion
-
-    return jsonify({"estimated_time": f"{estimated_time_minutes} minutes"})
-
-def estimate_ntk_time(samples, lr, momentum, epsilon):
-    # Pseudo Code 기반 구현
-    elr = lr / (1 - momentum)
-    steps = int((samples / elr) * epsilon * 10)  # Simplified NTK-based steps estimation
-    return steps
-
+#@app.route('/api/estimate_time', methods=['POST'])
+#def estimate_time():
+#    global MODEL_FILE_CACHE
+#    model_file = request.files.get('modelFile', None)
+#    subsets_str = request.form.get('subsets', '[]')
+#    subsets = json.loads(subsets_str)
+#
+#    with tempfile.TemporaryDirectory() as tmpdir:
+#        if model_file:
+#            local_model = os.path.join(tmpdir, 'uploaded_model.pth')
+#            model_file.save(local_model)
+#            MODEL_FILE_CACHE = local_model
+#
+#        combined_ds = combine_and_sample(subsets, tmpdir)
+#
+#        # NTK 기반 훈련 시간 예측 알고리즘 구현
+#        num_samples = sum([sub['num_samples'] for sub in subsets])
+#        learning_rate = 0.001
+#        momentum = 0.9
+#        threshold = 0.01
+#        estimated_steps = estimate_ntk_time(num_samples, learning_rate, momentum, threshold)
+#        estimated_time_minutes = round(estimated_steps * 0.5 / 60, 2)  # mock time conversion
+#
+#    return jsonify({"estimated_time": f"{estimated_time_minutes} minutes"})
+#
+#def estimate_ntk_time(samples, lr, momentum, epsilon):
+#    # Pseudo Code 기반 구현
+#    elr = lr / (1 - momentum)
+#    steps = int((samples / elr) * epsilon * 10)  # Simplified NTK-based steps estimation
+#    return steps
 
 @app.route('/api/start_training', methods=['POST'])
 def start_training():
@@ -164,4 +163,4 @@ def download_from_s3(s3_uri, local_path):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=22)
